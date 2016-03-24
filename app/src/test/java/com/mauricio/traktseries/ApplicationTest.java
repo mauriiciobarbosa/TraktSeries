@@ -38,7 +38,7 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
         }
     }
 
-    private JSONArray getJSONArray() {
+    public JSONArray getJSONArray() {
         return new JSONArray() {
             @Override
             public String toString() {
@@ -47,7 +47,7 @@ public class ApplicationTest extends ApplicationTestCase<Application> {
         };
     }
 
-    private List<Serie> getCorrectResponse() {
+    public List<Serie> getCorrectResponse() {
         return new ArrayList<Serie>() {{
             new Serie("Game of Thrones", 2011, new Images(new Poster("https://walter.trakt.us/images/shows/000/001/390/posters/thumb/93df9cd612.jpg")));
             new Serie("Breaking Bad", 2008, new Images(new Poster("https://walter.trakt.us/images/shows/000/001/388/posters/thumb/fa39b59954.jpg")));

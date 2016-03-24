@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity implements ObserverJSON {
     @ViewById(R.id.recycler_view)
     public RecyclerView recyclerView;
     @ViewById(R.id.progress)
-    public ProgressBar spinner;
+    public ProgressBar progressBar;
 
     private List<Serie> series;
     private SerieAdapter serieAdapter;
@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements ObserverJSON {
     @Override
     protected void onStart() {
         if (isNetworkAvailable()) {
-            spinner.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.VISIBLE);
             connect();
             loadSeries();
         }
@@ -114,12 +114,12 @@ public class MainActivity extends AppCompatActivity implements ObserverJSON {
         recyclerView.setAdapter(serieAdapter);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setLayoutManager(new GridLayoutManager(this, COLUMNS_NUMBER));
-        spinner.setVisibility(View.GONE);
+        progressBar.setVisibility(View.GONE);
     }
 
     @Override
     public void onError(int idMessage) {
-        spinner.setVisibility(View.GONE);
+        progressBar.setVisibility(View.GONE);
         showMessageError(getString(idMessage));
     }
 

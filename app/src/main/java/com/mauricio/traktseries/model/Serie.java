@@ -26,4 +26,16 @@ public class Serie {
         return images;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        boolean isSerie = o instanceof Serie;
+
+        if (!isSerie)
+            return false;
+
+        Serie other = (Serie) o;
+
+        return title.equals(other.getTitle()) && year == other.getYear()
+                && images.equals(other.getImages());
+    }
 }

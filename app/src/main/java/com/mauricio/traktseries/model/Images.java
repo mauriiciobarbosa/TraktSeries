@@ -17,4 +17,16 @@ public class Images {
     public void setPoster(Poster poster) {
         this.poster = poster;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        boolean isImages = o instanceof  Images;
+
+        if (!isImages)
+            return false;
+
+        Images other = (Images) o;
+
+        return poster.equals(other.getPoster());
+    }
 }
