@@ -1,18 +1,17 @@
 package com.mauricio.traktseries;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.appindexing.Action;
@@ -21,7 +20,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.mauricio.traktseries.model.Serie;
 import com.mauricio.traktseries.model.SerieAdapter;
 import com.mauricio.traktseries.utils.JSONUtils;
-import com.mauricio.traktseries.utils.ObserverJSON;
+import com.mauricio.traktseries.model.ObserverJSON;
 
 import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.EActivity;
@@ -35,6 +34,8 @@ import java.util.Map;
 @EActivity(R.layout.activity_main)
 public class MainActivity extends AppCompatActivity implements ObserverJSON {
 
+    private static final int COLUMNS_NUMBER = 3;
+
     @ViewById(R.id.recycler_view)
     public RecyclerView recyclerView;
     @ViewById(R.id.progress)
@@ -47,17 +48,18 @@ public class MainActivity extends AppCompatActivity implements ObserverJSON {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (isNetworkAvaiable()) {
+        if (isNetworkAvailable()) {
             initComponents();
         } else {
-            showMessageError("Você não está conectado. Favor verificar conexão!");
+            showMessageError(getString(R.string.error_connection));
         }
         super.onCreate(savedInstanceState);
     }
 
     @Override
     protected void onStart() {
-        if (isNetworkAvaiable()) {
+        if (isNetworkAvailable()) {
+            spinner.setVisibility(View.VISIBLE);
             connect();
             loadSeries();
         }
@@ -66,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements ObserverJSON {
 
     @Override
     protected void onStop() {
-        if (isNetworkAvaiable()) {
+        if (isNetworkAvailable()) {
             disconnect();
         }
         super.onStop();
@@ -79,11 +81,10 @@ public class MainActivity extends AppCompatActivity implements ObserverJSON {
         actionBar.setCustomView(R.layout.action_bar);
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
         action = Action.newAction(Action.TYPE_VIEW,
-                "Main Page",
-                Uri.parse("http://host/path"),
-                Uri.parse("android-app://com.mauricio.traktseries/http/host/path"));
-        // exibir feedback de espera
-        //spinner.setVisibility(View.VISIBLE);
+                getString(R.string.main_page),
+                Uri.parse(getString(R.string.host_pah)),
+                Uri.parse(getString(R.string.android_app_host_path)));
+        JSONUtils.setApplicationContext(getApplicationContext());
     }
 
     private void connect() {
@@ -98,12 +99,11 @@ public class MainActivity extends AppCompatActivity implements ObserverJSON {
 
     @Background
     public void loadSeries() {
-        Map<String, String> params = new HashMap<String, String>();
-        params.put(JSONUtils.URL, "https://api-v2launch.trakt.tv/shows/popular?extended=images");
-        params.put(JSONUtils.CONTENT_TYPE, "application/json");
-        params.put(JSONUtils.API_KEY, "f8c9aca99767c9802b8ab678ba327add9b3474f84f35cf2a2c993bb99fac7e6e");
-        params.put(JSONUtils.API_VERSION, "2");
-        JSONUtils.setApplicationContext(getApplicationContext());
+        Map<String, String> params = new HashMap<>();
+        params.put(JSONUtils.URL, getString(R.string.api_url));
+        params.put(JSONUtils.CONTENT_TYPE, getString(R.string.api_content_type));
+        params.put(JSONUtils.API_KEY, getString(R.string.api_key));
+        params.put(JSONUtils.API_VERSION, getString(R.string.api_version));
         JSONUtils.makeRequest(this, params);
     }
 
@@ -113,34 +113,23 @@ public class MainActivity extends AppCompatActivity implements ObserverJSON {
         serieAdapter = new SerieAdapter(this, series);
         recyclerView.setAdapter(serieAdapter);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-        recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
-        //spinner.setVisibility(View.GONE);
+        recyclerView.setLayoutManager(new GridLayoutManager(this, COLUMNS_NUMBER));
+        spinner.setVisibility(View.GONE);
     }
 
     @Override
-    public void onError(String message) {
-        //spinner.setVisibility(View.GONE);
-        showMessageError(message);
+    public void onError(int idMessage) {
+        spinner.setVisibility(View.GONE);
+        showMessageError(getString(idMessage));
     }
 
-    private boolean isNetworkAvaiable() {
+    private boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         return connectivityManager.getActiveNetworkInfo() != null && connectivityManager.getActiveNetworkInfo().isConnected();
     }
 
     private void showMessageError(String message) {
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder
-                .setMessage(message)
-                .setCancelable(false)
-                .setNeutralButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                        finish();
-                    }
-                });
-        AlertDialog alertDialog = alertDialogBuilder.create();
-        alertDialog.show();
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        finish();
     }
 }
